@@ -44,17 +44,32 @@ urlinfo_t *parse_url(char *url)
     5. Set the port pointer to 1 character after the spot returned by strchr.
     6. Overwrite the colon with a '\0' so that we are just left with the hostname.
   */
-
   ///////////////////
   // IMPLEMENT ME! //
   ///////////////////
-  int slash = strchr(urlinfo->hostname, '/');
-  int colon = strchr(urlinfo->hostname, ':');
 
-  urlinfo->path = (slash + 1);
-  urlinfo->hostname[slash] = '\0';
-  urlinfo->port = colon + 1;
-  urlinfo->hostname[colon] = '\0';
+  path = strchr(hostname, '/');
+  // printf("\n\n <-- PARSE URL --> \n\n");
+  port = strchr(hostname, ':');
+
+  // printf("strlen of path: %lu\n", strlen(path));
+  // printf("strlen of port: %lu\n", strlen(port));
+  // printf("strlen of hostname: %lu\n", strlen(hostname));
+
+  urlinfo->path = (path + 1);
+  // printf("Path: %s\n", urlinfo->path);
+  *path = '\0';
+
+  // if (strlen(urlinfo->path) == 0) {
+  //   urlinfo->path = "/";
+  // }
+  
+  // printf("Hostname after path: %s\n", hostname);
+  urlinfo->port = (port + 1);
+  // printf("Port: %s\n", urlinfo->port);
+  *port = '\0';
+  // printf("Hostname after port: %s\n", hostname);
+  urlinfo->hostname = hostname;
 
   return urlinfo;
 }
@@ -79,9 +94,9 @@ int send_request(int fd, char *hostname, char *port, char *path)
   // IMPLEMENT ME! //
   ///////////////////
   int request_length = sprintf(request, "GET /%s HTTP/1.1\n"
-                                          "Host: %s:%s\n"
-                                          "Connection: close\n",
-                                          path, hostname, port
+                                        "Host: %s:%s\n"
+                                        "Connection: close\n",
+                                        path, hostname, port
   );
 
   rv = send(fd, request, request_length, 0);
@@ -114,6 +129,21 @@ int main(int argc, char *argv[])
   ///////////////////
   // IMPLEMENT ME! //
   ///////////////////
+
+  // Parsing
+  // printf("\n\ntesting\n\n");
+  urlinfo_t *parsed = parse_url(argv[1]);
+  printf("Hostname: %s\n", parsed->hostname);
+  printf("Path: \"%s\"\n", parsed->path);
+  printf("Port: %s\n", parsed->port);
+  // Initializing a socket
+  sockfd = get_socket(parsed->hostname, parsed->port);
+  // Calling send_request to construct the request and send it
+  send_request(sockfd, parsed->hostname, parsed->port, parsed->path);
+  // Recieve the response from the server and print to stdout
+  while ((numbytes = recv(sockfd, buf, BUFSIZE - 1, 0)) > 0) {
+    fwrite(buf, 1, numbytes, stdout);
+  };
 
   return 0;
 }
