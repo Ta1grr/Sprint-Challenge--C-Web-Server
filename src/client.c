@@ -48,6 +48,13 @@ urlinfo_t *parse_url(char *url)
   ///////////////////
   // IMPLEMENT ME! //
   ///////////////////
+  int slash = strchr(urlinfo->hostname, '/');
+  int colon = strchr(urlinfo->hostname, ':');
+
+  urlinfo->path = slash + 1;
+  urlinfo->hostname[slash] = '\0';
+  urlinfo->port = colon + 1;
+  urlinfo->hostname[colon] = '\0';
 
   return urlinfo;
 }
@@ -71,6 +78,8 @@ int send_request(int fd, char *hostname, char *port, char *path)
   ///////////////////
   // IMPLEMENT ME! //
   ///////////////////
+
+
 
   return 0;
 }
@@ -96,6 +105,6 @@ int main(int argc, char *argv[])
   ///////////////////
   // IMPLEMENT ME! //
   ///////////////////
-// initial pull request
+
   return 0;
 }
